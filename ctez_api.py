@@ -1,6 +1,7 @@
 import tornado.ioloop
 import tornado.web
 import ctez_collector
+import ctez_chart
 import threading
 import time
 
@@ -12,6 +13,7 @@ class MainHandler(tornado.web.RequestHandler):
 def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
+        (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "static"}),
     ])
 
 
@@ -22,6 +24,7 @@ class ThreadedClient(threading.Thread):
     def run(self):
         while True:
             ctez_collector.collect()
+            ctez_chart.chart()
             time.sleep(3600)
 
 

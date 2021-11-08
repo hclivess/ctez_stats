@@ -8,7 +8,7 @@ url = "https://api.better-call.dev/v1/contract/mainnet/KT1GWnsoFZVHGh7roXEER3qeC
 
 def read_input():
     try:
-        with open("outfile.txt", "r+") as infile:
+        with open("outfile.json", "r+") as infile:
             input_dict = json.loads(infile.read())
     except Exception as e:
         print(f"Error: {e}")
@@ -40,10 +40,15 @@ def collect():
 
         input_dict = read_input()
 
-        merged = input_dict | output_dict
+        merged = {**input_dict, **output_dict}
 
-        with open("outfile.txt", "w+") as outfile:
+        print(f"Merged {input_dict} with {output_dict} into {merged}")
+
+        with open("outfile.json", "w+") as outfile:
             outfile.write(json.dumps(merged))
 
     except Exception as e:
         print(f"Failed to fetch data: {e}")
+
+if __name__ == "__main__":
+    collect()
