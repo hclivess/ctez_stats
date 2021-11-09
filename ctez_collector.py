@@ -29,12 +29,15 @@ def collect():
         drift_value_raw = parsed_json["children"][2]
         drift_value = drift_value_raw["value"]
 
-        # e^(51410×365×24×3600÷2^48)−1
-        drift_value_pct = round(math.exp(int(drift_value) * 365 * 24 * 3600 / 2 ** 48) - 1, 2)
-        print(drift_value_pct)
+        target_value_raw = parsed_json["children"][5]
+        target_value = target_value_raw["value"]
 
-        print(drift_timestamp)
-        print(drift_value)
+        print(target_value)
+        target_value_pct = round(math.exp(int(target_value) * 365 * 24 * 3600 / 2 ** 48) - 1, 10)
+        print(target_value_pct)
+
+        # e^(51410×365×24×3600÷2^48)−1
+        drift_value_pct = round(math.exp(int(drift_value) * 365 * 24 * 3600 / 2 ** 48) - 1, 10)
 
         output_dict = {drift_timestamp: drift_value_pct}
 
