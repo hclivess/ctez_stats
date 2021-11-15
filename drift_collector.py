@@ -4,11 +4,12 @@ import requests
 import json
 from dateutil import parser
 
+database = "outfile.json"
 url = "https://api.better-call.dev/v1/contract/mainnet/KT1GWnsoFZVHGh7roXEER3qeCcgJgrXT3de2/storage"
 
 def read_input():
     try:
-        with open("outfile.json", "r+") as infile:
+        with open(database, "r+") as infile:
             input_dict = json.loads(infile.read())
     except Exception as e:
         print(f"Error: {e}")
@@ -47,7 +48,7 @@ def collect():
 
         print(f"Merged {input_dict} with {output_dict} into {merged}")
 
-        with open("outfile.json", "w+") as outfile:
+        with open(database, "w+") as outfile:
             outfile.write(json.dumps(merged))
 
     except Exception as e:
