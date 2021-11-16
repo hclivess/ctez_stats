@@ -6,7 +6,11 @@ from dateutil import parser
 
 
 def block_start_get():
-    return read_input()["last_block"]
+    try:
+        start = read_input()["last_block"]
+    except:
+        start = 1793972
+    return start
 
 
 def block_last_get():
@@ -47,10 +51,10 @@ def collect(block_start=block_start_get(), block_last=block_last_get()):
 
                 target_value = parsed_json["children"][5]["value"]
 
-                target_value_pct = round(math.exp(int(target_value) * 365 * 24 * 3600 / 2 ** 48) - 1)
+                target_value_pct = math.exp(int(target_value) * 365 * 24 * 3600 / 2 ** 48) - 1
 
                 # e^(51410×365×24×3600÷2^48)−1
-                drift_value_pct = round(math.exp(int(drift_value) * 365 * 24 * 3600 / 2 ** 48) - 1)
+                drift_value_pct = math.exp(int(drift_value) * 365 * 24 * 3600 / 2 ** 48) - 1
 
                 output_dict = {level: {
                     "drift": drift_value_pct,
