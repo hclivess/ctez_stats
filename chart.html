@@ -20,7 +20,7 @@ new Chart(document.getElementById("line-chart"), {
   data: {
     labels: {%raw keys%},
     datasets: [{
-        data: {{values}},
+        data: {% raw values %},
         label: "Drift over time",
         borderColor: "#3e95cd",
         fill: false

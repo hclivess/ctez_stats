@@ -13,14 +13,25 @@ def to_ts(date_strings):
         timestamps.append(int(timestamp))
     return timestamps
 
+def x_get(dict, key):
+    drift_list = []
+    for subdict in dict.values():
+        try:
+            drift_list.append(subdict[key])
+        except Exception as e:
+            print(f"Error, probably wrong part of the dict: {e}")
+    return drift_list
+
 class ChartHandler(tornado.web.RequestHandler):
     def get(self):
-        with open("outfile.json", "r+") as infile:
+        with open("database.json", "r+") as infile:
             input_dict = json.loads(infile.read())
+
+        drift_list = x_get(input_dict, "drift")
 
         self.render("chart.html",
                     keys=json.dumps(list(input_dict.keys())),
-                    values=json.dumps(list(input_dict.values()))
+                    values=json.dumps(drift_list)
                     )
 
 
