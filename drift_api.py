@@ -6,6 +6,13 @@ import time
 import json
 from datetime import datetime
 
+def reduce(whole, reduce_to=1000):
+    """reduce number of entries in list by skipping"""
+    reducer = int(len(whole)/reduce_to)
+    reduced = whole[::reducer]
+    return reduced
+
+
 def to_ts(date_strings):
     timestamps = []
     for key in date_strings:
@@ -19,18 +26,24 @@ def x_get(dict, key):
         try:
             drift_list.append(subdict[key])
         except Exception as e:
-            print(f"Error, probably wrong part of the dict: {e}")
+            print(f"Error with {subdict}, probably wrong part of the dict (go rework dict logic): {e}")
     return drift_list
 
 class ChartHandler(tornado.web.RequestHandler):
     def get(self):
-        with open("database.json", "r+") as infile:
-            input_dict = json.loads(infile.read())
+        while True:
+            try:
+                with open("database.json", "r+") as infile:
+                    input_dict = json.loads(infile.read())
+                    break
+            except Exception as e:
+                print (f"Error {e}, retrying file access")
 
-        drift_list = x_get(input_dict, "drift")
+        drift_list = reduce(x_get(input_dict, "drift"))
+        labels = reduce(list(input_dict.keys()))
 
         self.render("chart.html",
-                    keys=json.dumps(list(input_dict.keys())),
+                    labels=json.dumps(labels),
                     values=json.dumps(drift_list)
                     )
 
