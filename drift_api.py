@@ -37,7 +37,7 @@ class ChartHandler(tornado.web.RequestHandler):
                     input_dict = json.loads(infile.read())
                     break
             except Exception as e:
-                print (f"Error {e}, retrying file access")
+                print(f"Error {e}, retrying file access")
 
         drift_list = reduce(x_get(input_dict, "drift"))
         labels = reduce(list(input_dict.keys()))
