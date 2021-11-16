@@ -31,44 +31,43 @@ def read_input():
 def collect(block_start=block_start_get(), block_last=block_last_get()):
     for level in range(block_start, block_last):
         print(f"Processing block {level}")
-        try:
-            url = f"https://api.better-call.dev/v1/contract/mainnet/KT1GWnsoFZVHGh7roXEER3qeCcgJgrXT3de2/storage?level={level}"
-            # origination = 1793972
+        while True:
+            try:
+                url = f"https://api.better-call.dev/v1/contract/mainnet/KT1GWnsoFZVHGh7roXEER3qeCcgJgrXT3de2/storage?level={level}"
+                # origination = 1793972
 
-            parsed = requests.get(url)
+                parsed = requests.get(url)
 
-            parsed_json = json.loads(parsed.text)[0]
+                parsed_json = json.loads(parsed.text)[0]
 
-            drift_timestamp_raw = parsed_json["children"][3]
-            drift_timestamp = str(parser.parse(drift_timestamp_raw["value"]))
+                drift_timestamp_raw = parsed_json["children"][3]
+                drift_timestamp = str(parser.parse(drift_timestamp_raw["value"]))
 
-            drift_value = parsed_json["children"][2]["value"]
+                drift_value = parsed_json["children"][2]["value"]
 
-            target_value = parsed_json["children"][5]["value"]
+                target_value = parsed_json["children"][5]["value"]
 
-            # ovens_value = parsed_json["children"][4]["value"] #only real time
+                target_value_pct = round(math.exp(int(target_value) * 365 * 24 * 3600 / 2 ** 48) - 1)
 
-            target_value_pct = round(math.exp(int(target_value) * 365 * 24 * 3600 / 2 ** 48) - 1)
+                # e^(51410×365×24×3600÷2^48)−1
+                drift_value_pct = round(math.exp(int(drift_value) * 365 * 24 * 3600 / 2 ** 48) - 1)
 
-            # e^(51410×365×24×3600÷2^48)−1
-            drift_value_pct = round(math.exp(int(drift_value) * 365 * 24 * 3600 / 2 ** 48) - 1)
+                output_dict = {level: {
+                    "drift": drift_value_pct,
+                    "timestamp": drift_timestamp,
+                    "target": target_value_pct},
+                    "last_block": level}
 
-            output_dict = {level: {
-                "drift": drift_value_pct,
-                "timestamp": drift_timestamp,
-                "target": target_value_pct,
-                # "ovens": ovens_value
-            }, "last_block": level}
+                input_dict = read_input()
 
-            input_dict = read_input()
+                merged = {**input_dict, **output_dict}
 
-            merged = {**input_dict, **output_dict}
+                with open("database.json", "w+") as outfile:
+                    outfile.write(json.dumps(merged))
+                break
 
-            with open("database.json", "w+") as outfile:
-                outfile.write(json.dumps(merged))
-
-        except Exception as e:
-            print(f"Failed to fetch data: {e}")
+            except Exception as e:
+                print(f"Failed to fetch data: {e}")
 
 
 if __name__ == "__main__":
