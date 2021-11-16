@@ -3,6 +3,7 @@ import time
 import requests
 import json
 from dateutil import parser
+import shutil
 
 
 def block_start_get():
@@ -11,6 +12,16 @@ def block_start_get():
     except:
         start = 1793972
     return start
+
+
+def write_output(data):
+    try:
+        shutil.copy("database.json", "database.json.backup")
+    except Exception as e:
+        print(f"Backup failed: {e}")
+
+    with open("database.json", "w+") as outfile:
+        outfile.write(json.dumps(data))
 
 
 def block_last_get():
@@ -33,6 +44,8 @@ def read_input():
 
 
 def collect(block_start=block_start_get(), block_last=block_last_get()):
+    output_dict = {}
+
     for level in range(block_start, block_last):
         print(f"Processing block {level}")
         while True:
@@ -56,22 +69,24 @@ def collect(block_start=block_start_get(), block_last=block_last_get()):
                 # e^(51410×365×24×3600÷2^48)−1
                 drift_value_pct = math.exp(int(drift_value) * 365 * 24 * 3600 / 2 ** 48) - 1
 
-                output_dict = {level: {
+                output_dict[level] = {
                     "drift": drift_value_pct,
                     "timestamp": drift_timestamp,
-                    "target": target_value_pct},
-                    "last_block": level}
+                    "target": target_value_pct}
+                output_dict["last_block"] = level
 
-                input_dict = read_input()
+                if level % 1000 == 0:
+                    print("Saving...")
+                    input_dict = read_input()
+                    merged = {**input_dict, **output_dict}
+                    write_output(merged)
 
-                merged = {**input_dict, **output_dict}
-
-                with open("database.json", "w+") as outfile:
-                    outfile.write(json.dumps(merged))
                 break
 
             except Exception as e:
                 print(f"Failed to fetch data: {e}")
+
+
 
 
 if __name__ == "__main__":
