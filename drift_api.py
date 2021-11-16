@@ -44,7 +44,7 @@ class ThreadedClient(threading.Thread):
     def run(self):
         while True:
             drift_collector.collect()
-            time.sleep(3600)
+            time.sleep(60)
 
 
 if __name__ == "__main__":

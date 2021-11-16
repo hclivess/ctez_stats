@@ -4,55 +4,77 @@ import requests
 import json
 from dateutil import parser
 
-database = "outfile.json"
-url = "https://api.better-call.dev/v1/contract/mainnet/KT1GWnsoFZVHGh7roXEER3qeCcgJgrXT3de2/storage"
+
+def block_start_get():
+    return read_input()["last_block"]
+
+
+def block_last_get():
+    url_stats = "https://api.better-call.dev/v1/stats"
+    stats_parsed = requests.get(url_stats)
+    stats_parsed_json = json.loads(stats_parsed.text)
+    for entry in stats_parsed_json:
+        if entry["network"] == "mainnet":
+            return entry["level"]
+
 
 def read_input():
     try:
-        with open(database, "r+") as infile:
+        with open("database.json", "r+") as infile:
             input_dict = json.loads(infile.read())
     except Exception as e:
         print(f"Error: {e}")
         input_dict = {}
     return input_dict
 
-def collect():
-    try:
-        parsed = requests.get(url)
 
-        parsed_json = json.loads(parsed.text)[0]
+def collect(block_start=block_start_get(), block_last=block_last_get()):
+    for level in range(block_start, block_last):
+        print(f"Processing block {level}")
+        try:
+            url = f"https://api.better-call.dev/v1/contract/mainnet/KT1GWnsoFZVHGh7roXEER3qeCcgJgrXT3de2/storage?level={level}"
+            # origination = 1793972
 
-        print(parsed_json)
+            parsed = requests.get(url)
 
-        drift_timestamp_raw = parsed_json["children"][3]
-        drift_timestamp = str(parser.parse(drift_timestamp_raw["value"]))
+            parsed_json = json.loads(parsed.text)[0]
 
-        drift_value_raw = parsed_json["children"][2]
-        drift_value = drift_value_raw["value"]
+            drift_timestamp_raw = parsed_json["children"][3]
+            drift_timestamp = str(parser.parse(drift_timestamp_raw["value"]))
 
-        target_value_raw = parsed_json["children"][5]
-        target_value = target_value_raw["value"]
+            drift_value = parsed_json["children"][2]["value"]
 
-        print(target_value)
-        target_value_pct = round(math.exp(int(target_value) * 365 * 24 * 3600 / 2 ** 48) - 1, 10)
-        print(target_value_pct)
+            target_value = parsed_json["children"][5]["value"]
 
-        # e^(51410×365×24×3600÷2^48)−1
-        drift_value_pct = round(math.exp(int(drift_value) * 365 * 24 * 3600 / 2 ** 48) - 1, 10)
+            # ovens_value = parsed_json["children"][4]["value"] #only real time
 
-        output_dict = {drift_timestamp: drift_value_pct}
+            target_value_pct = round(math.exp(int(target_value) * 365 * 24 * 3600 / 2 ** 48) - 1)
 
-        input_dict = read_input()
+            # e^(51410×365×24×3600÷2^48)−1
+            drift_value_pct = round(math.exp(int(drift_value) * 365 * 24 * 3600 / 2 ** 48) - 1)
 
-        merged = {**input_dict, **output_dict}
+            output_dict = {level: {
+                "drift": drift_value_pct,
+                "timestamp": drift_timestamp,
+                "target": target_value_pct,
+                # "ovens": ovens_value
+            }, "last_block": level}
 
-        print(f"Merged {input_dict} with {output_dict} into {merged}")
+            input_dict = read_input()
 
-        with open(database, "w+") as outfile:
-            outfile.write(json.dumps(merged))
+            merged = {**input_dict, **output_dict}
 
-    except Exception as e:
-        print(f"Failed to fetch data: {e}")
+            with open("database.json", "w+") as outfile:
+                outfile.write(json.dumps(merged))
+
+        except Exception as e:
+            print(f"Failed to fetch data: {e}")
+
 
 if __name__ == "__main__":
-    collect()
+    # block_start = 1793972
+    block_start_val = block_start_get()
+    block_last_val = block_last_get()
+
+    collect(block_start=block_start_val,
+            block_last=block_last_val)
