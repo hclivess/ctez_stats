@@ -8,7 +8,7 @@ import shutil
 
 def block_start_get():
     try:
-        start = read_input()["last_block"]
+        start = read_input()["stats"]["last_block"]
     except:
         start = 1793972
     return start
@@ -39,12 +39,32 @@ def read_input():
             input_dict = json.loads(infile.read())
     except Exception as e:
         print(f"Error: {e}")
-        input_dict = {}
+        input_dict = get_clear_dict()
     return input_dict
 
 
+def get_clear_dict(dict_in={}):
+    dict_in.clear()
+    dict_out = {"data": {},
+                "stats": {}
+                }
+    return dict_out
+
+def merge_save(output_dict):
+    print("Saving...")
+    input_dict = read_input()
+
+    merged_data = {**input_dict["data"], **output_dict["data"]}
+    merged_stats = {**input_dict["stats"], **output_dict["stats"]}
+
+    merged = {"data": merged_data, "stats": merged_stats}
+
+    print(f"Total of {len(merged_data)} data entries")
+    write_output(merged)
+
+
 def collect(block_start=block_start_get(), block_last=block_last_get()):
-    output_dict = {}
+    output_dict = get_clear_dict()
 
     for level in range(block_start, block_last):
         print(f"Processing block {level}")
@@ -69,24 +89,24 @@ def collect(block_start=block_start_get(), block_last=block_last_get()):
                 # e^(51410×365×24×3600÷2^48)−1
                 drift_value_pct = math.exp(int(drift_value) * 365 * 24 * 3600 / 2 ** 48) - 1
 
-                output_dict[level] = {
+                output_dict["data"][level] = {
                     "drift": drift_value_pct,
                     "timestamp": drift_timestamp,
                     "target": target_value_pct}
-                output_dict["last_block"] = level
+
+                output_dict["stats"]["last_block"] = level
 
                 if level % 1000 == 0:
-                    print("Saving...")
-                    input_dict = read_input()
-                    merged = {**input_dict, **output_dict}
-                    write_output(merged)
+                    merge_save(output_dict)
+                    output_dict = get_clear_dict()
 
                 break
 
             except Exception as e:
-                print(f"Failed to fetch data: {e}")
+                print(f"Failed: {e}")
+                raise
 
-
+    merge_save(output_dict)  # save at the end
 
 
 if __name__ == "__main__":

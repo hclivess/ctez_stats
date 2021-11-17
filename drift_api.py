@@ -6,9 +6,10 @@ import time
 import json
 from datetime import datetime
 
+
 def reduce(whole, reduce_to=1000):
     """reduce number of entries in list by skipping"""
-    reducer = int(len(whole)/reduce_to)
+    reducer = int(len(whole) / reduce_to)
     reduced = whole[::reducer]
     return reduced
 
@@ -20,31 +21,53 @@ def to_ts(date_strings):
         timestamps.append(int(timestamp))
     return timestamps
 
-def x_get(dict, key):
-    drift_list = []
-    for subdict in dict.values():
-        try:
-            drift_list.append(subdict[key])
-        except Exception as e:
-            print(f"Error with {subdict}, probably wrong part of the dict (go rework dict logic): {e}")
-    return drift_list
 
 class ChartHandler(tornado.web.RequestHandler):
     def get(self):
-        while True:
-            try:
-                with open("database.json", "r+") as infile:
-                    input_dict = json.loads(infile.read())
-                    break
-            except Exception as e:
-                print(f"Error {e}, retrying file access")
+        input_dict = drift_collector.read_input()["data"]
 
-        drift_list = reduce(x_get(input_dict, "drift"))
-        labels = reduce(list(input_dict.keys()))
+        print(input_dict.keys())
+
+        values_full = []
+
+        for key in input_dict.keys():
+            print(input_dict[key]["drift"])
+            values_full.append(input_dict[key]["drift"])
+            print(input_dict[key]["drift"])
+        print(values_full)
+
+        labels_full = input_dict.keys()
+
+        values = reduce(list(values_full))
+        labels = reduce(list(labels_full))
 
         self.render("chart.html",
                     labels=json.dumps(labels),
-                    values=json.dumps(drift_list)
+                    values=json.dumps(values)
+                    )
+
+
+class ChartRecentHandler(tornado.web.RequestHandler):
+    def get(self):
+        input_dict = drift_collector.read_input()
+
+        block_max = input_dict["stats"]["last_block"]
+        block_min = block_max - 1000
+        block_range = range(block_min, block_max)
+
+        print(block_max)
+
+        x_list = []
+        for key in input_dict.keys():
+            print(key)
+            if int(key) >= block_min:
+                x_list.append(key)
+
+        print(x_list)
+
+        self.render("chart.html",
+                    labels=json.dumps(""),
+                    values=json.dumps("")
                     )
 
 
@@ -57,6 +80,7 @@ def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
         (r"/chart", ChartHandler),
+        (r"/chart_recent", ChartRecentHandler),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "static"}),
     ])
 
