@@ -69,6 +69,10 @@ def merge_save(output_dict):
 
 
 def collect(block_start, block_last):
+    if block_start >= block_last:
+        print("No new data, skipping run")
+        return
+
     output_dict = get_clear_dict()
 
     print(f"Started processing range of {block_start} - {block_last}")
