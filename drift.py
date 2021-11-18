@@ -22,9 +22,9 @@ def to_ts(date_strings):
     return timestamps
 
 
-class ChartHandler(tornado.web.RequestHandler):
+class AllHandler(tornado.web.RequestHandler):
     def get(self, data):
-        chart = ChartHandler.get_argument(self, "chart")
+        chart = AllHandler.get_argument(self, "chart")
 
         input_dict = drift_collector.read_input()["data"]
 
@@ -45,9 +45,9 @@ class ChartHandler(tornado.web.RequestHandler):
                     )
 
 
-class ChartRecentHandler(tornado.web.RequestHandler):
+class RecentHandler(tornado.web.RequestHandler):
     def get(self, data):
-        chart = ChartRecentHandler.get_argument(self, "chart")
+        chart = RecentHandler.get_argument(self, "chart")
 
         input_dict = drift_collector.read_input()
 
@@ -57,12 +57,13 @@ class ChartRecentHandler(tornado.web.RequestHandler):
 
         value_list = []
         for key, value in input_dict["data"].items():
-            if int(key) >= block_min:
+            if block_min <= int(key) <= block_max:
                 value_list.append(value[chart])
 
         self.render("chart.html",
                     labels=json.dumps(block_range),
-                    values=json.dumps(value_list)
+                    values=json.dumps(value_list),
+                    title=chart
                     )
 
 
@@ -78,8 +79,8 @@ def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
         (r"/api", ApiHandler),
-        (r"/chart(.*)", ChartHandler),
-        (r"/chart_recent(.*)", ChartRecentHandler),
+        (r"/all(.*)", AllHandler),
+        (r"/recent(.*)", RecentHandler),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "static"}),
     ])
 
