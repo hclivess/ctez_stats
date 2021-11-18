@@ -11,6 +11,7 @@ def block_start_get():
         start = read_input()["stats"]["last_block"]
     except:
         start = 1793972
+    print(f"Start block: {start}")
     return start
 
 
@@ -30,6 +31,7 @@ def block_last_get():
     stats_parsed_json = json.loads(stats_parsed.text)
     for entry in stats_parsed_json:
         if entry["network"] == "mainnet":
+            print(f"Last block: {entry['level']}")
             return entry["level"]
 
 
@@ -55,7 +57,9 @@ def merge_save(output_dict):
     input_dict = read_input()
 
     merged_data = {**input_dict["data"], **output_dict["data"]}
-    merged_stats = {**input_dict["stats"], **output_dict["stats"]}
+    merged_stats = output_dict["stats"]
+
+    print(f'Last block (to save): {output_dict["stats"]["last_block"]}')
 
     merged = {"data": merged_data, "stats": merged_stats}
 
@@ -66,6 +70,7 @@ def merge_save(output_dict):
 def collect(block_start=block_start_get(), block_last=block_last_get()):
     output_dict = get_clear_dict()
 
+    print(f"Started processing range of {block_start} - {block_last}")
     for level in range(block_start, block_last):
         print(f"Processing block {level}")
         while True:
@@ -98,7 +103,7 @@ def collect(block_start=block_start_get(), block_last=block_last_get()):
 
                 if level % 1000 == 0:
                     merge_save(output_dict)
-                    output_dict = get_clear_dict()
+                    #output_dict = get_clear_dict()
 
                 break
 
@@ -107,7 +112,7 @@ def collect(block_start=block_start_get(), block_last=block_last_get()):
                 raise
 
     merge_save(output_dict)  # save at the end
-
+    print(f"Finished processing range of {block_start} - {block_last}")
 
 if __name__ == "__main__":
     # block_start = 1793972

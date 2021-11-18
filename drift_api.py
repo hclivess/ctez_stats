@@ -53,21 +53,16 @@ class ChartRecentHandler(tornado.web.RequestHandler):
 
         block_max = input_dict["stats"]["last_block"]
         block_min = block_max - 1000
-        block_range = range(block_min, block_max)
+        block_range = list(range(block_min, block_max))
 
-        print(block_max)
-
-        x_list = []
-        for key in input_dict.keys():
-            print(key)
+        value_list = []
+        for key, value in input_dict["data"].items():
             if int(key) >= block_min:
-                x_list.append(key)
-
-        print(x_list)
+                value_list.append(value["drift"])
 
         self.render("chart.html",
-                    labels=json.dumps(""),
-                    values=json.dumps("")
+                    labels=json.dumps(block_range),
+                    values=json.dumps(value_list)
                     )
 
 
@@ -92,6 +87,7 @@ class ThreadedClient(threading.Thread):
     def run(self):
         while True:
             drift_collector.collect()
+            print("Sleeping...")
             time.sleep(60)
 
 
