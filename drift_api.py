@@ -86,9 +86,10 @@ class ThreadedClient(threading.Thread):
 
     def run(self):
         while True:
-            drift_collector.collect()
+            drift_collector.collect(block_last=drift_collector.block_last_get(),
+                                    block_start=drift_collector.block_start_get())
             print("Sleeping...")
-            time.sleep(60)
+            time.sleep(10)
 
 
 if __name__ == "__main__":

@@ -68,11 +68,11 @@ def merge_save(output_dict):
     write_output(merged)
 
 
-def collect(block_start=block_start_get(), block_last=block_last_get()):
+def collect(block_start, block_last):
     output_dict = get_clear_dict()
 
     print(f"Started processing range of {block_start} - {block_last}")
-    for level in range(block_start, block_last + 1):  # +1 to include in rangee
+    for level in range(block_start, block_last + 1):  # +1 to include in range
         print(f"Processing block {level}")
         while True:
             try:
@@ -118,8 +118,5 @@ def collect(block_start=block_start_get(), block_last=block_last_get()):
 
 if __name__ == "__main__":
     # block_start = 1793972
-    block_start_val = block_start_get()
-    block_last_val = block_last_get()
-
-    collect(block_start=block_start_val,
-            block_last=block_last_val)
+    collect(block_last=block_last_get(),
+            block_start=block_start_get())
