@@ -92,9 +92,9 @@ def collect(block_start, block_last):
 
                 drift_value = parsed_json["children"][2]["value"]
 
-                target_value = parsed_json["children"][5]["value"]
+                target_value = parsed_json["children"][6]["value"]
 
-                target_value_pct = math.exp(int(target_value) * 365 * 24 * 3600 / 2 ** 48) - 1
+                target_value_pct = int(target_value) / 2 ** 48
 
                 # e^(51410×365×24×3600÷2^48)−1
                 drift_value_pct = math.exp(int(drift_value) * 365 * 24 * 3600 / 2 ** 48) - 1
