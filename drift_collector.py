@@ -114,7 +114,6 @@ def collect(block_start, block_last):
 
             except Exception as e:
                 print(f"Failed: {e}")
-                raise
 
     merge_save(output_dict)  # save at the end
     print(f"Finished processing range of {block_start} - {block_last}")
