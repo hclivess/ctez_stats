@@ -9,15 +9,15 @@
 <div class="container" align="center">
     <h1>ctez Stats</h1>
     <a class="btn btn-primary" href="/api" role="button">API</a>
-    <a class="btn btn-primary" href="/all?chart=drift" role="button">Drift</a>
-    <a class="btn btn-primary" href="/recent?chart=drift" role="button">Recent Drift</a>
-    <a class="btn btn-primary" href="/all?chart=target" role="button">Target</a>
-    <a class="btn btn-primary" href="/recent?chart=target" role="button">Recent Target</a>
+    <a class="btn btn-primary" href="/chart?chart=drift&start=min&end=max&resolution=1000" role="button">Drift</a>
+    <a class="btn btn-primary" href="/chart?chart=drift&start=-1000&end=max&resolution=max" role="button">Recent Drift</a>
+    <a class="btn btn-primary" href="/chart?chart=target&start=min&end=max&resolution=1000" role="button">Target</a>
+    <a class="btn btn-primary" href="/chart?chart=target&start=-1000&end=max&resolution=max" role="button">Recent Target</a>
     <a class="btn btn-primary" href="https://github.com/hclivess/ctez_drift_stats" role="button">GitHub</a>
 </div>
 
 <div class="mx-auto" align="center">
-    <img src="static/ctez512.png" m="100">
+    <img src="static/ctez512.png">
 </div>
 
 </body>

@@ -22,21 +22,44 @@ def to_ts(date_strings):
     return timestamps
 
 
-class AllHandler(tornado.web.RequestHandler):
+class ChartHandler(tornado.web.RequestHandler):
     def get(self, data):
-        chart = AllHandler.get_argument(self, "chart")
+        chart = ChartHandler.get_argument(self, "chart")
+        start = ChartHandler.get_argument(self, "start")
+        end = ChartHandler.get_argument(self, "end")
+        resolution = ChartHandler.get_argument(self, "resolution")
 
-        input_dict = drift_collector.read_input()["data"]
+        input_dict = drift_collector.read_input()
 
-        values_full = []
+        maximum = input_dict["stats"]["last_block"]
 
-        for key in input_dict.keys():
-            values_full.append(input_dict[key][chart])
+        if end == "max":
+            end = maximum
+        if start == "min":
+            start = 1793972  # contract origination
+        if int(start) < 0:  # if negative number is used, subtract it from maximum
+            start = maximum + int(start)
+        if int(start) < 1793972 and start > 0:  # prevent oor operation (exclude negative numbers)
+            start = 1793972
+        if int(end) > maximum:  # prevent oor operation
+            end = maximum
 
-        labels_full = input_dict.keys()
+        block_range = list(range(int(start), int(end) + 1))  # +1 to include in range
 
-        values = reduce(list(values_full))
-        labels = reduce(list(labels_full))
+        value_list = []
+        for key, value in input_dict["data"].items():
+            if int(start) <= int(key) <= int(end):
+                value_list.append(value[chart])
+
+        values = value_list
+        labels = block_range
+
+        if resolution != "max":
+            if int(resolution) > int(end) - start:
+                resolution = int(end) - start
+
+            values = reduce(list(value_list), int(resolution))
+            labels = reduce(list(block_range), int(resolution))
 
         self.render("chart.html",
                     labels=json.dumps(labels),
@@ -45,42 +68,21 @@ class AllHandler(tornado.web.RequestHandler):
                     )
 
 
-class RecentHandler(tornado.web.RequestHandler):
-    def get(self, data):
-        chart = RecentHandler.get_argument(self, "chart")
-
-        input_dict = drift_collector.read_input()
-
-        block_max = input_dict["stats"]["last_block"]
-        block_min = block_max - 1000
-        block_range = list(range(block_min, block_max + 1))  # +1 to include in range
-
-        value_list = []
-        for key, value in input_dict["data"].items():
-            if block_min <= int(key) <= block_max:
-                value_list.append(value[chart])
-
-        self.render("chart.html",
-                    labels=json.dumps(block_range),
-                    values=json.dumps(value_list),
-                    title=chart
-                    )
-
-
 class ApiHandler(tornado.web.RequestHandler):
     def get(self):
         self.write(drift_collector.read_input())
+
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("dashboard.html")
 
+
 def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
         (r"/api", ApiHandler),
-        (r"/all(.*)", AllHandler),
-        (r"/recent(.*)", RecentHandler),
+        (r"/chart(.*)", ChartHandler),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "static"}),
     ])
 
