@@ -1,9 +1,8 @@
-# ctez Drift Stats
-
+# cTez Drift Stats
 This application collects ctez drift and target information from the better-call.dev interface
-
-access simple chart:
-http://localhost:8888/chart
-
-access data endpoint api:
-http://localhost:8888/
+## Installation: 
+- `sudo apt-get install Python3.9`
+- `sudo git clone hclivess/ctez_stats`
+## Running: 
+- `cd ctez_stats`
+- `Python3.9 drift.py`
