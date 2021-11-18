@@ -23,18 +23,15 @@ def to_ts(date_strings):
 
 
 class ChartHandler(tornado.web.RequestHandler):
-    def get(self):
-        input_dict = drift_collector.read_input()["data"]
+    def get(self, data):
+        chart = ChartHandler.get_argument(self, "chart")
 
-        print(input_dict.keys())
+        input_dict = drift_collector.read_input()["data"]
 
         values_full = []
 
         for key in input_dict.keys():
-            print(input_dict[key]["drift"])
-            values_full.append(input_dict[key]["drift"])
-            print(input_dict[key]["drift"])
-        print(values_full)
+            values_full.append(input_dict[key][chart])
 
         labels_full = input_dict.keys()
 
@@ -43,12 +40,15 @@ class ChartHandler(tornado.web.RequestHandler):
 
         self.render("chart.html",
                     labels=json.dumps(labels),
-                    values=json.dumps(values)
+                    values=json.dumps(values),
+                    title=chart
                     )
 
 
 class ChartRecentHandler(tornado.web.RequestHandler):
-    def get(self):
+    def get(self, data):
+        chart = ChartHandler.get_argument(self, "chart")
+
         input_dict = drift_collector.read_input()
 
         block_max = input_dict["stats"]["last_block"]
@@ -58,7 +58,7 @@ class ChartRecentHandler(tornado.web.RequestHandler):
         value_list = []
         for key, value in input_dict["data"].items():
             if int(key) >= block_min:
-                value_list.append(value["drift"])
+                value_list.append(value[chart])
 
         self.render("chart.html",
                     labels=json.dumps(block_range),
@@ -66,16 +66,20 @@ class ChartRecentHandler(tornado.web.RequestHandler):
                     )
 
 
-class MainHandler(tornado.web.RequestHandler):
+class ApiHandler(tornado.web.RequestHandler):
     def get(self):
         self.write(drift_collector.read_input())
 
+class MainHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.render("dashboard.html")
 
 def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
-        (r"/chart", ChartHandler),
-        (r"/chart_recent", ChartRecentHandler),
+        (r"/api", ApiHandler),
+        (r"/chart(.*)", ChartHandler),
+        (r"/chart_recent(.*)", ChartRecentHandler),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "static"}),
     ])
 
