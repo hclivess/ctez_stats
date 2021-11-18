@@ -47,7 +47,7 @@ class ChartHandler(tornado.web.RequestHandler):
 
 class ChartRecentHandler(tornado.web.RequestHandler):
     def get(self, data):
-        chart = ChartHandler.get_argument(self, "chart")
+        chart = ChartRecentHandler.get_argument(self, "chart")
 
         input_dict = drift_collector.read_input()
 
