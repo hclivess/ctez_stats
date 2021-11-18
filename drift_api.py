@@ -53,7 +53,7 @@ class ChartRecentHandler(tornado.web.RequestHandler):
 
         block_max = input_dict["stats"]["last_block"]
         block_min = block_max - 1000
-        block_range = list(range(block_min, block_max))
+        block_range = list(range(block_min, block_max + 1))  # +1 to include in range
 
         value_list = []
         for key, value in input_dict["data"].items():
