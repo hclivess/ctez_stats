@@ -51,18 +51,15 @@ class ChartHandler(tornado.web.RequestHandler):
             if int(start) <= int(key) <= int(end):
                 value_list.append(value[chart])
 
-        values = value_list
-        labels = block_range
-
         if resolution != "max":
             if int(resolution) > int(end) - start:
                 resolution = int(end) - start
 
-        if resolution <= 0:
+        if resolution != "max" and int(resolution) <= 0:
             resolution = 1
 
-            values = reduce(list(value_list), int(resolution))
-            labels = reduce(list(block_range), int(resolution))
+        values = reduce(list(value_list), int(resolution))
+        labels = reduce(list(block_range), int(resolution))
 
         self.render("chart.html",
                     labels=json.dumps(labels),
