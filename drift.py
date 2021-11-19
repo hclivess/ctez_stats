@@ -58,6 +58,9 @@ class ChartHandler(tornado.web.RequestHandler):
             if int(resolution) > int(end) - start:
                 resolution = int(end) - start
 
+        if resolution <= 0:
+            resolution = 1
+
             values = reduce(list(value_list), int(resolution))
             labels = reduce(list(block_range), int(resolution))
 
