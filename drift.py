@@ -98,10 +98,13 @@ class ThreadedClient(threading.Thread):
 
     def run(self):
         while True:
-            drift_collector.collect(block_last=drift_collector.block_last_get(),
-                                    block_start=drift_collector.block_start_get())
-            print("Sleeping...")
-            time.sleep(10)
+            try:
+                drift_collector.collect(block_last=drift_collector.block_last_get(),
+                                        block_start=drift_collector.block_start_get())
+                print("Sleeping...")
+                time.sleep(10)
+            except Exception as e:
+                print(f"Error: {e}")
 
 
 if __name__ == "__main__":
