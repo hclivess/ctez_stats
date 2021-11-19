@@ -8,7 +8,7 @@ This application collects ctez drift and target information from the better-call
 ## Running: 
 - `cd ctez_stats`
 - `Python3.9 drift.py`
-- open browser at http://localhost:8080 to access the menu
+- open browser at http://localhost:8888 to access the menu
 
 ## Notes:
 Notice that URLs are programmable, required parameters:
