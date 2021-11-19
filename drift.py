@@ -87,6 +87,8 @@ def make_app():
         (r"/api", ApiHandler),
         (r"/chart(.*)", ChartHandler),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "static"}),
+        (r'/(favicon.ico)', tornado.web.StaticFileHandler, {"path": "static"}),
+
     ])
 
 
